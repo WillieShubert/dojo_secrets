@@ -3,8 +3,13 @@ from .models import User
 from django.contrib import messages
 # Create your views here.
 
+
 def index(request):
     return render(request, 'whisper/index.html')
+
+def secrets(request):
+    print "successfully rendered"
+    return render(request, 'whisper/secrets.html')
 
 def success(request):
     if 'userid' not in request.session:

@@ -52,11 +52,29 @@ class userManager(models.Manager):
             errors1.append("Sorry please try again!!!!")
             return (False, errors1)
 
+    def secreteval(self, postData):
+        errors2= []
+        if len(Secret.object.filter(message= postData['message']))<1:
+            errors2.append("Secret can not be blank")
+        if len(errors)==0:
+            newmessage= Secret.objects.create(message= postData['message'])
+            return (True, newmessage)
+        else:
+            return (False, errors)
+
 class User(models.Model):
     first_name = models.CharField(max_length=45)
     last_name = models.CharField(max_length=45)
     email = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = userManager()
+
+class Secret(models.Model):
+    message = models.TextField(max_length=1000)
+    likes= models.ManyToManyField(User, related_name="all_likes")
+    user= models.ForeignKey(User, related_name= "author")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = userManager()
