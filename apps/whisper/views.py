@@ -11,11 +11,12 @@ def index(request):
 def secrets(request):
     if 'userid' not in request.session:
         return redirect ("/")
-    # = Secret.objects.annotate(num_like=Count("likes"))
+    count_like= Secret.objects.annotate(num_like=Count('likes'))
+    print count_like[3].num_like
     context = {
         "user": User.objects.get(id=request.session['userid']),
         "secrets" : Secret.objects.all(),
-        "likes" : num_like
+        "likes" : count_like
     }
     return render(request, 'whisper/secrets.html', context)
 
@@ -35,8 +36,9 @@ def whisper(request):
 
 def like(request):
     if request.method == "POST":
-        newlike = Secret.objects.get(id=request.session['userid'])
-        newlike.likes.add(request.session['userid'])
+        print Secret.objects.secreteval
+        print Secret.objects.like
+        newlike = Secret.objects.like(id= request.POST['like'])
     else:
         message.add(request, messageINFO, "Nice try")
     return redirect('/secrets')

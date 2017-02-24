@@ -73,8 +73,10 @@ class secretsManager(models.Manager):
         else:
             return (False, errors2)
 
-    # def likes (self, postData):
-        #in order to make a new like, you need to know which instance of secret we're liking and which user (the user comes from session, and the secret id should be coming from a hidden or from the url kwarg)
+    def like(self, postData, id):
+        newuser= User.objects.get(id=id)
+        newlike= Secret.likes.add(newuser)
+        return newlike
 
 class Secret(models.Model):
     message = models.TextField(max_length=1000)
