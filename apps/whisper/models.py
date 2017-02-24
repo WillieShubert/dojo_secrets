@@ -52,6 +52,17 @@ class userManager(models.Manager):
             errors1.append("Sorry please try again!!!!")
             return (False, errors1)
 
+class User(models.Model):
+    first_name = models.CharField(max_length=45)
+    last_name = models.CharField(max_length=45)
+    email = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    objects = userManager()
+
+
+class secretsManager(models.Manager):
     def secreteval(self, postData, user):
         errors2= []
         if len(postData['message']) == 0:
@@ -62,19 +73,8 @@ class userManager(models.Manager):
         else:
             return (False, errors2)
 
-
     # def likes (self, postData):
         #in order to make a new like, you need to know which instance of secret we're liking and which user (the user comes from session, and the secret id should be coming from a hidden or from the url kwarg)
-
-
-class User(models.Model):
-    first_name = models.CharField(max_length=45)
-    last_name = models.CharField(max_length=45)
-    email = models.CharField(max_length=100)
-    password = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    objects = userManager()
 
 class Secret(models.Model):
     message = models.TextField(max_length=1000)
@@ -82,4 +82,4 @@ class Secret(models.Model):
     user= models.ForeignKey(User, related_name= "author")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = userManager()
+    objects = secretsManager()

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from .models import User, Secret
 from django.contrib import messages
+from django.db.models import Count
 # Create your views here.
 
 
@@ -10,14 +11,20 @@ def index(request):
 def secrets(request):
     if 'userid' not in request.session:
         return redirect ("/")
-    return render(request, 'whisper/secrets.html')
+    # = Secret.objects.annotate(num_like=Count("likes"))
+    context = {
+        "user": User.objects.get(id=request.session['userid']),
+        "secrets" : Secret.objects.all(),
+        "likes" : num_like
+    }
+    return render(request, 'whisper/secrets.html', context)
 
 def whisper(request):
     if 'userid' not in request.session:
         return redirect ("/")
     if request.method == "POST":
         user = User.objects.get(id= request.session['userid'])
-        newmessage = Secret.objects.secreteval(request.POST['message'], user)
+        newmessage = Secret.objects.secreteval(request.POST, user)
         if newmessage[0] == False :
             for each in newmessage[1]:
                 messages.error(request, each)
@@ -28,8 +35,8 @@ def whisper(request):
 
 def like(request):
     if request.method == "POST":
-        newlike = Secret.objects.get()
-        newmlike.like.add(id = request.session['userid'])
+        newlike = Secret.objects.get(id=request.session['userid'])
+        newlike.likes.add(request.session['userid'])
     else:
         message.add(request, messageINFO, "Nice try")
     return redirect('/secrets')
@@ -49,8 +56,8 @@ def register(request):
         return redirect('/secrets')
 
 def login(request):
-    # if 'userid' in request.session:
-    #     return redirect('/success')
+    if 'userid' in request.session:
+        return redirect('/secrets')
     if request.method == 'GET':
         return redirect('/')
     else:
