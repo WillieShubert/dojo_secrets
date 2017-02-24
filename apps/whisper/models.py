@@ -54,13 +54,18 @@ class userManager(models.Manager):
 
     def secreteval(self, postData):
         errors2= []
-        if len(Secret.object.filter(message= postData['message']))<1:
+        if len(postData['message']) == 0:
             errors2.append("Secret can not be blank")
         if len(errors)==0:
             newmessage= Secret.objects.create(message= postData['message'])
             return (True, newmessage)
         else:
             return (False, errors)
+
+
+    # def likes (self, postData):
+        #in order to make a new like, you need to know which instance of secret we're liking and which user (the user comes from session, and the secret id should be coming from a hidden or from the url kwarg)
+
 
 class User(models.Model):
     first_name = models.CharField(max_length=45)
