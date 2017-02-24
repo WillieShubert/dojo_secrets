@@ -56,7 +56,7 @@ class userManager(models.Manager):
         errors2= []
         if len(postData['message']) == 0:
             errors2.append("Secret can not be blank")
-        if len(errors)==0:
+        if len(errors2)==0:
             newmessage= Secret.objects.create(message= postData['message'])
             return (True, newmessage)
         else:
