@@ -13,14 +13,18 @@ def secrets(request):
     return render(request, 'whisper/secrets.html')
 
 def whisper(request):
+    if 'userid' not in request.session:
+        return redirect ("/")
     if request.method == "POST":
-        newmessage = Secret.objects.secreteval(request.POST)
-        if newmessage[0] == False:
-            message.error(request)
+        user = User.objects.get(id= request.session['userid'])
+        newmessage = Secret.objects.secreteval(request.POST['message'], user)
+        if newmessage[0] == False :
+            for each in newmessage[1]:
+                messages.error(request, each)
+            return redirect('/secrets')
         if newmessage[0]==True:
             print newmessage[1]
-        return redirect('/secrets')
-
+            return redirect('/secrets')
 
 def like(request):
     if request.method == "POST":
@@ -29,8 +33,6 @@ def like(request):
     else:
         message.add(request, messageINFO, "Nice try")
     return redirect('/secrets')
-
-
 
 def register(request):
     if request.method == 'GET':

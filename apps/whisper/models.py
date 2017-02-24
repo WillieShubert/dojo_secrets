@@ -52,15 +52,15 @@ class userManager(models.Manager):
             errors1.append("Sorry please try again!!!!")
             return (False, errors1)
 
-    def secreteval(self, postData):
+    def secreteval(self, postData, user):
         errors2= []
         if len(postData['message']) == 0:
             errors2.append("Secret can not be blank")
         if len(errors2)==0:
-            newmessage= Secret.objects.create(message= postData['message'])
+            newmessage= Secret.objects.create(message= postData['message'], user= user)
             return (True, newmessage)
         else:
-            return (False, errors)
+            return (False, errors2)
 
 
     # def likes (self, postData):
