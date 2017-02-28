@@ -2,46 +2,61 @@ from django.shortcuts import render, redirect, HttpResponse
 from .models import User, Secret
 from django.contrib import messages
 from django.db.models import Count
+
 # Create your views here.
-
-
 def index(request):
     return render(request, 'whisper/index.html')
 
 def secrets(request):
-    if 'userid' not in request.session:
-        return redirect ("/")
-    count_like= Secret.objects.annotate(num_like=Count('likes'))
-    print count_like[3].num_like
-    context = {
-        "user": User.objects.get(id=request.session['userid']),
-        "secrets" : Secret.objects.all(),
-        "likes" : count_like
-    }
-    return render(request, 'whisper/secrets.html', context)
-
-def whisper(request):
-    if 'userid' not in request.session:
-        return redirect ("/")
-    if request.method == "POST":
-        user = User.objects.get(id= request.session['userid'])
-        newmessage = Secret.objects.secreteval(request.POST, user)
-        if newmessage[0] == False :
-            for each in newmessage[1]:
-                messages.error(request, each)
-            return redirect('/secrets')
-        if newmessage[0]==True:
-            print newmessage[1]
-            return redirect('/secrets')
-
-def like(request):
-    if request.method == "POST":
-        print Secret.objects.secreteval
-        print Secret.objects.like
-        newlike = Secret.objects.like(id= request.POST['like'])
+    if 'userid' in request.session:
+        allsecrets = Secret.objects.all().order_by('-id') [:5]
+        context ={
+            "secrets": allsecrets,
+            "currentuser": User.objects.get(id= request.session['userid'])
+        }
+        return render(request, 'whisper/secrets.html', context)
     else:
-        message.add(request, messageINFO, "Nice try")
+        return redirect('/')
+
+def process(request):
+    if request.method =='GET':
+        return redirect('/')
+    result= Secret.objects.validate(request.POST['message'], request.session['userid'])
+    if result[0]:
+        messages.info(request, result[1])
+        return redirect('/secrets')
+    messages.error(request, result[1])
     return redirect('/secrets')
+
+def newlike(request, id, sentby):
+    result= Secret.objects.newlike(id, request.session['userid'])
+    if result[0]==False:
+        message.error(request, result[1])
+    if sentby=="sec":
+        return redirect ("/secrets")
+    else:
+        return redirect('/popular')
+
+def delete(request, id, sentby):
+    print "deleting", id
+    result = Secret.objects.deleteLike(id, request.session['userid'])
+    if result[0]==False:
+        message.error(request, result[1])
+    if sentby=="sec":
+        return redirect ("/secrets")
+    else:
+        return redirect('/popular')
+
+def popular(request):
+    if 'userid' in request.session:
+        allsecrets= Secret.objects.annotate(num_likes=Count('likers')).order_by('-num_likes')
+        context = {
+            "secrets": allsecrets,
+            "currentuser": User.objects.get(id=request.session['userid'])
+        }
+        return render(request,'whisper/popular.html', context)
+    else:
+        return redirect ('/')
 
 def register(request):
     if request.method == 'GET':

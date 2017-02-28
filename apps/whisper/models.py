@@ -61,27 +61,44 @@ class User(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = userManager()
 
+class secretManager(models.Manager):
+    def validate (self, postData, userid):
+        if len(postData)<3:
+            return(False, "Secrets must be at least 3 characters long")
+        print postData, userid
+        try:
+            currentuser = User.objects.get(id=userid)
+            self.create(message=postData, author=currentuser)
+            return(True, "Secret's safe with us")
+        except:
+            return(False, "We couldn't create this secret")
 
-class secretsManager(models.Manager):
-    def secreteval(self, postData, user):
-        errors2= []
-        if len(postData['message']) == 0:
-            errors2.append("Secret can not be blank")
-        if len(errors2)==0:
-            newmessage= Secret.objects.create(message= postData['message'], user= user)
-            return (True, newmessage)
-        else:
-            return (False, errors2)
+    def newlike(self, secretid, userid):
+        try:
+            secret = self.get(id=secretid)
+        except:
+            return(False, "Secret not found")
+        user = User.objects.get(id=userid)
+        if secret.author == user:
+            return (False, "No self-love")
+        secret.likers.add(user)
+        return(True, "You liked this secret")
 
-    def like(self, postData, id):
-        newuser= User.objects.get(id=id)
-        newlike= Secret.likes.add(newuser)
-        return newlike
+    def deleteLike(self,secretid,userid):
+        try:
+            secret = self.get(id=secretid)
+        except:
+            return(False, "Secret not found")
+        user = User.objects.get(id=userid)
+        if secret.author != user:
+            return (False, "Don't delete others secrets")
+        secret.delete()
+        return (True, "Secret Deleted")
 
 class Secret(models.Model):
     message = models.TextField(max_length=1000)
-    likes= models.ManyToManyField(User, related_name="all_likes")
-    user= models.ForeignKey(User, related_name= "author")
+    likers= models.ManyToManyField(User, related_name="all_likes")
+    author= models.ForeignKey(User)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    objects = secretsManager()
+    objects = secretManager()

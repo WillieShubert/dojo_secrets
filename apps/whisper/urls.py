@@ -5,8 +5,10 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'^register$', views.register),
     url(r'^login$', views.login),
-    url(r'^like$', views.like),
+    url(r'^logout$', views.logout),
     url(r'^secrets$', views.secrets),
-    url(r'^whisper$', views.whisper),
-    url(r'^logout$', views.logout)
+    url(r'^process$', views.process),
+    url(r'^like/(?P<id>\d+)/(?P<sentby>\w+)$', views.newlike),
+    url(r'^delete/(?P<id>\d+)/(?P<sentby>\w+)$', views.delete),
+    url(r'^popular$', views.popular)
 ]
